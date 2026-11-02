@@ -14,7 +14,7 @@ if not exist "%GAME_ROOT%\Control_DX12.exe" if not exist "%GAME_ROOT%\Control.ex
   goto :finish
 )
 
-echo Recurrent Title Cards v1.0b — standalone alternative
+echo Recurrent Title Cards v1.0b - standalone alternative
 echo ---------------------------------------------------
 echo Builds v1.0b from the verified game HUD, or converts the exact v1.0 loose HUD.
 echo It checks the source and final hashes and backs up any existing loose HUD outside data\.
