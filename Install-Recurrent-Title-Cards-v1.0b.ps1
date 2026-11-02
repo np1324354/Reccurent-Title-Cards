@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Recurrent Title Cards v1.0b — standalone installer.
+# Recurrent Title Cards v1.0b - standalone installer.
 # Reads the user's verified stock HUD (or exact v1.0 HUD), builds v1.0b,
 # verifies the complete output hash, then installs with an external backup.
 
@@ -91,13 +91,20 @@ try {
 
     $backupDirectory = Join-Path $gameRoot '_mod_backups\Recurrent-Title-Cards-v1.0b'
 
+    # The game's own HUD must match the verified build, whether or not a loose copy already exists.
+    $archiveBytes = Get-StockHudFromArchive -Root $gameRoot
+    $archiveHash = Get-Sha256 $archiveBytes
+    if ($archiveHash -ne $stockHash) {
+        throw "The game's own HUD (SHA-256 $archiveHash) does not match the verified Steam build. No changes were made. If you installed this mod earlier and the game has since been updated, delete data\uiresources\p7\hud.ui so the game uses its own HUD again."
+    }
+
     if ([System.IO.File]::Exists($target)) {
         $hadPreviousLooseHud = $true
         $sourceBytes = [System.IO.File]::ReadAllBytes($target)
         Write-Host 'Source: existing loose hud.ui'
     }
     else {
-        $sourceBytes = Get-StockHudFromArchive -Root $gameRoot
+        $sourceBytes = $archiveBytes
         Write-Host 'Source: stock hud.ui extracted from the game archive'
     }
 
@@ -180,10 +187,10 @@ try {
 
     # A unique backup is kept outside data\ so the loose-file loader does not
     # enumerate the backup as another game resource.
-    [void][System.IO.Directory]::CreateDirectory($backupDirectory)
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
     $backupName = ''
     if ($hadPreviousLooseHud) {
+        [void][System.IO.Directory]::CreateDirectory($backupDirectory)
         $backupName = "hud.ui.before-v1.0b-$stamp.bak"
         $backupPath = Join-Path $backupDirectory $backupName
         if ([System.IO.File]::Exists($backupPath)) { throw 'The generated backup filename already exists.' }
